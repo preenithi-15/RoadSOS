@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import StatusBar from './components/StatusBar';
 import BottomNav from './components/BottomNav';
 import SplashScreen from './components/SplashScreen';
+import InstallBanner from './components/InstallBanner';
 import HomePage from './pages/HomePage';
 import SOSPage from './pages/SOSPage';
 import MedicalPage from './pages/MedicalPage';
@@ -49,6 +50,9 @@ export default function App() {
         {/* Bottom navigation */}
         <BottomNav />
       </div>
+
+      {/* PWA install banner — floats above nav, position:fixed */}
+      <InstallBanner />
 
       {/* Desktop background */}
       <div

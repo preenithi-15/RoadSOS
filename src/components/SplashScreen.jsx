@@ -260,35 +260,49 @@ export default function SplashScreen({ onDone }) {
             animation: `varadhi-ambient 1.8s ease-out ${glowDelay} forwards`,
           }} />
 
-          {/* THE ACTUAL LOGO IMAGE — wipes in left→right */}
-          <img
-            src="/road.jpeg"
-            alt="VARADHI"
-            style={{
-              width:  200,
-              height: 200,
-              objectFit: 'contain',
-              position: 'relative',
-              zIndex: 2,
-              mixBlendMode: 'lighten',
-              clipPath: 'inset(0 100% 0 0)',
-              animation: `varadhi-logo-reveal 1.4s cubic-bezier(0.4,0,0.2,1) ${logoDelay} forwards`,
-              filter: 'drop-shadow(0 0 0px rgba(255,59,59,0))',
-            }}
-          />
-
-          {/* Light sweep */}
+          {/* THE ACTUAL LOGO — circular clip removes black square bg */}
           <div style={{
-            position: 'absolute',
-            inset: 0,
-            zIndex: 3,
-            borderRadius: 4,
-            background: 'linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.15) 50%, transparent 70%)',
-            backgroundSize: '300% 100%',
-            backgroundPosition: '200% 0',
+            width: 200, height: 200,
+            borderRadius: '50%',
+            overflow: 'hidden',
+            position: 'relative',
+            zIndex: 2,
             opacity: 0,
-            animation: `varadhi-sweep 0.9s cubic-bezier(0.4,0,0.2,1) ${sweepDelay} forwards`,
-          }} />
+            animation: `varadhi-logo-fade 0.6s ease-out ${logoDelay} forwards`,
+            filter: 'drop-shadow(0 0 0px rgba(255,59,59,0))',
+            animationName: 'varadhi-logo-fade, varadhi-logo-glow',
+            animationDuration: `0.6s, 1.4s`,
+            animationTimingFunction: `ease-out, ease-out`,
+            animationDelay: `${logoDelay}, ${logoDelay}`,
+            animationFillMode: 'forwards, forwards',
+          }}>
+            {/* Wipe-reveal mask: a dark cover that slides away left→right */}
+            <div style={{
+              position: 'absolute', inset: 0, zIndex: 3,
+              background: '#080808',
+              transformOrigin: 'left center',
+              animation: `varadhi-wipe-away 1.2s cubic-bezier(0.4,0,0.2,1) ${logoDelay} forwards`,
+            }} />
+
+            <img
+              src="/road.jpeg"
+              alt="VARADHI"
+              style={{
+                width: '100%', height: '100%',
+                objectFit: 'cover',
+                display: 'block',
+              }}
+            />
+
+            {/* Light sweep — lives inside the circle clip */}
+            <div style={{
+              position: 'absolute', inset: 0, zIndex: 4,
+              background: 'linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.18) 50%, transparent 70%)',
+              backgroundSize: '300% 100%', backgroundPosition: '200% 0',
+              opacity: 0,
+              animation: `varadhi-sweep 0.9s cubic-bezier(0.4,0,0.2,1) ${sweepDelay} forwards`,
+            }} />
+          </div>
         </div>
 
         {/* VARADHI brand letters */}
@@ -355,10 +369,18 @@ export default function SplashScreen({ onDone }) {
           10%  { opacity: 1; }
           100% { transform: scale(1);    opacity: 1; }
         }
-        @keyframes varadhi-logo-reveal {
-          0%   { clip-path: inset(0 100% 0 0); filter: drop-shadow(0 0 0px rgba(255,59,59,0)); }
-          65%  { clip-path: inset(0 0% 0 0);   filter: drop-shadow(0 0 22px rgba(255,59,59,0.7)) drop-shadow(0 0 5px rgba(255,255,255,0.15)); }
-          100% { clip-path: inset(0 0% 0 0);   filter: drop-shadow(0 0 12px rgba(255,59,59,0.4)) drop-shadow(0 0 2px rgba(255,255,255,0.08)); }
+        @keyframes varadhi-logo-fade {
+          0%   { opacity: 0; }
+          100% { opacity: 1; }
+        }
+        @keyframes varadhi-logo-glow {
+          0%   { filter: drop-shadow(0 0 0px  rgba(255,59,59,0)); }
+          50%  { filter: drop-shadow(0 0 22px rgba(255,59,59,0.7)) drop-shadow(0 0 5px rgba(255,255,255,0.15)); }
+          100% { filter: drop-shadow(0 0 12px rgba(255,59,59,0.4)) drop-shadow(0 0 2px rgba(255,255,255,0.08)); }
+        }
+        @keyframes varadhi-wipe-away {
+          0%   { transform: scaleX(1); transform-origin: left center; }
+          100% { transform: scaleX(0); transform-origin: left center; }
         }
         @keyframes varadhi-ring {
           0%   { opacity: 0; box-shadow: none; border-color: rgba(255,59,59,0); }
