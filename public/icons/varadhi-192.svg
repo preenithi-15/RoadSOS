@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <rect width="192" height="192" fill="#000000"/>
+  <circle cx="96" cy="96" r="84" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="2.5"/>
+  <path d="M96 42 L149 61 L149 110 Q149 151 96 168 Q43 151 43 110 L43 61 Z"
+    fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="3.2" stroke-linejoin="round"/>
+  <polyline
+    points="24,96 52,96 66,96 76,60 84,132 90,79 97,96 168,96"
+    fill="none" stroke="#FF2D2D" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="38" cy="96" r="4" fill="none" stroke="#FF2D2D" stroke-width="3"/>
+  <circle cx="154" cy="96" r="4" fill="none" stroke="#FF2D2D" stroke-width="3"/>
+  <path d="M84 105 Q81 130 87 150" fill="none" stroke="rgba(255,255,255,0.7)"
+    stroke-width="2.3" stroke-dasharray="7 6" stroke-linecap="round"/>
+  <path d="M109 105 Q112 130 106 150" fill="none" stroke="rgba(255,255,255,0.7)"
+    stroke-width="2.3" stroke-dasharray="7 6" stroke-linecap="round"/>
+</svg>

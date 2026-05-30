@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Black background -->
+  <rect width="512" height="512" fill="#000000"/>
+
+  <!-- Outer circle -->
+  <circle cx="256" cy="256" r="225" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="6.5"/>
+
+  <!-- Shield -->
+  <path d="
+    M 256 92
+    L 543 177
+    L 543 317
+    Q 543 453 256 492
+    Q -31 453 -31 317
+    L -31 177
+    Z
+  " fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="8" stroke-linejoin="round"
+    transform="translate(0,0) scale(0.565) translate(0, 86)"/>
+
+  <!-- Redrawn shield using absolute coords centred at 256,256 -->
+  <path d="
+    M 256 118
+    L 543 203
+    L 543 343
+    Q 543 479 256 518
+    Q -31 479 -31 343
+    L -31 203
+    Z
+  " fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="8.5" stroke-linejoin="round"
+    transform="matrix(0.565,0,0,0.565,144.54,67.06)"/>
+
+  <!-- ECG line -->
+  <polyline
+    points="
+      62,256
+      140,256
+      176,256
+      202,158
+      220,350
+      238,211
+      258,256
+      448,256
+    "
+    fill="none"
+    stroke="#FF2D2D"
+    stroke-width="11"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- Left ECG node -->
+  <circle cx="100" cy="256" r="11" fill="none" stroke="#FF2D2D" stroke-width="8"/>
+  <!-- Right ECG node -->
+  <circle cx="410" cy="256" r="11" fill="none" stroke="#FF2D2D" stroke-width="8"/>
+
+  <!-- Road left lane -->
+  <path d="M 221 280 Q 214 345 232 400" fill="none" stroke="rgba(255,255,255,0.72)"
+    stroke-width="6" stroke-dasharray="20 18" stroke-linecap="round"/>
+  <!-- Road right lane -->
+  <path d="M 291 280 Q 298 345 280 400" fill="none" stroke="rgba(255,255,255,0.72)"
+    stroke-width="6" stroke-dasharray="20 18" stroke-linecap="round"/>
+</svg>

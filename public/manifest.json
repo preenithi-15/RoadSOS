@@ -1,0 +1,24 @@
+{
+  "name": "Varadhi",
+  "short_name": "Varadhi",
+  "description": "India's emergency corridor — real-time crash detection, responder dispatch, and medical pre-notification.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#FF2D2D",
+  "background_color": "#000000",
+  "icons": [
+    {
+      "src": "/icons/varadhi-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/varadhi-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
