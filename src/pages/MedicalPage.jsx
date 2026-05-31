@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Heart, Pill, AlertCircle, Phone, Edit3, Check, X, Plus, ShieldCheck, User, Wifi, FileText, Loader } from 'lucide-react';
-import { saveLifelineProfile } from '../api/api.js';
+import { saveLifelineProfile, getLifelineByToken } from '../api/api.js';
 import { getUserId } from '../lib/user.js';
 
 const BLOOD_TYPES = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
@@ -75,6 +75,14 @@ export default function MedicalPage() {
     if (stored.qr_token) {
       setQrToken(stored.qr_token);
       setQrUrl(`${BASE}/api/lifeline/${stored.qr_token}`);
+      // Refresh from backend to get latest data
+      getLifelineByToken(stored.qr_token).then(fresh => {
+        if (fresh?.blood_group) setBloodType(fresh.blood_group);
+        if (fresh?.allergies?.length) setAllergies(fresh.allergies);
+        if (fresh?.conditions?.length) setConditions(fresh.conditions);
+        if (fresh?.emergency_contact_name) setEcName(fresh.emergency_contact_name);
+        if (fresh?.emergency_contact_phone) setEcPhone(fresh.emergency_contact_phone);
+      }).catch(() => {});
     }
   }, []);
 

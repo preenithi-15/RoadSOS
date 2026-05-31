@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-le
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { AlertTriangle, MapPin, Radio, Navigation, CheckCircle, XCircle, Clock, ChevronDown, ChevronUp, Loader, FileBarChart } from 'lucide-react';
-import { getHazardNodes, getHospitalRoute, getNhaiReport, getEmergencyContacts } from '../api/api.js';
+import { getHazardNodes, getHospitalRoute, getNhaiReport, getEmergencyContacts, reportBrake } from '../api/api.js';
 import { getLocation, DEFAULT_LOCATION } from '../lib/location.js';
 
 delete L.Icon.Default.prototype._getIconUrl;
@@ -254,6 +254,22 @@ export default function MapPage() {
               <span style={{ fontSize:10, color:'#F87171' }}>⚠ Near-miss</span>
               <span style={{ fontSize:10, color:'#FB923C' }}>↩ Swerve</span>
               <span style={{ fontSize:10, color:'#FCD34D' }}>⚡ Hard brake</span>
+            </div>
+            {/* Report Brake / Hazard buttons */}
+            <div style={{ display:'flex', gap:6, marginBottom:6 }}>
+              {[['BRAKE','⚡','Hard Brake'],['SWERVE','↩','Swerve'],['NEAR_MISS','⚠️','Near Miss']].map(([type, icon, label]) => (
+                <button key={type} onClick={async () => {
+                  try {
+                    const { getUserId } = await import('../lib/user.js');
+                    const { getLocation } = await import('../lib/location.js');
+                    const [uid, loc] = await Promise.all([getUserId(), getLocation()]);
+                    await reportBrake({ user_id: uid, lat: loc.lat, lng: loc.lng, event_type: type });
+                    alert(`${icon} ${label} reported! Contributes to community hazard map.`);
+                  } catch(e) { console.warn('[Brake] report failed:', e); }
+                }} style={{ flex:1, padding:'6px 4px', borderRadius:8, border:'1px solid rgba(245,158,11,0.3)', background:'rgba(245,158,11,0.08)', color:'#F59E0B', fontSize:10, fontWeight:700, cursor:'pointer', textAlign:'center' }}>
+                  {icon} {label}
+                </button>
+              ))}
             </div>
             {/* NHAI Report button */}
             <button onClick={fetchNhaiReport} disabled={loadingReport} style={{ width:'100%', padding:'7px', borderRadius:10, background:'linear-gradient(135deg,rgba(59,130,246,0.2),rgba(29,78,216,0.3))', border:'1px solid rgba(59,130,246,0.4)', color:'#60A5FA', fontSize:11, fontWeight:700, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>

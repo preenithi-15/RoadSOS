@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Navigation, Plus, X, AlertTriangle, CheckCircle, Clock, Download, RefreshCw, MapPin, Shield, ChevronDown, ChevronUp, Loader, Route } from 'lucide-react';
-import { planTrip, addTripCheckpoint, getTripOfflineCache, liveRefreshTrip, checkProximity } from '../api/api.js';
+import { planTrip, addTripCheckpoint, removeTripCheckpoint, getTripOfflineCache, liveRefreshTrip, checkProximity } from '../api/api.js';
 import { getUserId } from '../lib/user.js';
 import { getLocation, DEFAULT_LOCATION } from '../lib/location.js';
 import { cacheTrip, startProximityMonitor, clearTripCache } from '../lib/tripMonitor.js';
@@ -34,7 +34,7 @@ function FitRoute({ points }) {
   return null;
 }
 
-function CheckpointCard({ cp, index, isLast }) {
+function CheckpointCard({ cp, index, isLast, onRemove }) {
   const [open, setOpen] = useState(false);
   const rs = RISK_STYLES[cp.risk_level] || RISK_STYLES.LOW;
   return (
@@ -54,6 +54,9 @@ function CheckpointCard({ cp, index, isLast }) {
         </div>
         <span style={{ padding: '2px 8px', borderRadius: 20, fontSize: 10, fontWeight: 700, background: rs.bg, color: rs.color, border: `1px solid ${rs.border}`, flexShrink: 0 }}>{rs.label}</span>
         {open ? <ChevronUp size={14} color="#6B7280" /> : <ChevronDown size={14} color="#6B7280" />}
+        {!cp.is_origin && !cp.is_destination && onRemove && (
+          <button onClick={e => { e.stopPropagation(); onRemove(cp.id); }} style={{ padding:'3px 6px', borderRadius:6, background:'rgba(239,68,68,0.15)', border:'none', color:'#EF4444', cursor:'pointer', fontSize:11, flexShrink:0 }}>✕</button>
+        )}
       </button>
       {open && cp.precautions?.length > 0 && (
         <div style={{ padding: '0 14px 12px' }}>
@@ -331,7 +334,12 @@ export default function TripPage() {
               Route Checkpoints ({checkpoints.length})
             </div>
             {checkpoints.map((cp, i) => (
-              <CheckpointCard key={cp.id || i} cp={cp} index={i + 1} isLast={i === checkpoints.length - 1} />
+              <CheckpointCard key={cp.id || i} cp={cp} index={i + 1} isLast={i === checkpoints.length - 1} onRemove={async (id) => {
+                try {
+                  await removeTripCheckpoint(id);
+                  setCps(prev => prev.filter(c => c.id !== id));
+                } catch(e) { console.warn('[Trip] remove checkpoint failed:', e); }
+              }} />
             ))}
           </>
         )}

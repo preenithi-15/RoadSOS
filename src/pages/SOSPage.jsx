@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Share2, CheckCircle, Mic, MicOff, WifiOff, Wifi, Radio } from 'lucide-react';
-import { triggerSOS, cancelSOS, classifyTriage, getHospitalRoute } from '../api/api.js';
+import { triggerSOS, cancelSOS, classifyTriage, getHospitalRoute, analyzeVoice } from '../api/api.js';
 import { getUserId } from '../lib/user.js';
 import { getLocation } from '../lib/location.js';
 import { isOnline, detectDeliveryLayer, cacheSOS, watchForRecovery, clearCachedSOS, hasCachedSOS } from '../lib/offline.js';
@@ -182,6 +182,7 @@ export default function SOSPage() {
   const [count, setCount]           = useState(10);
   const [selType, setSelType]       = useState('accident');
   const [recording, setRecording]   = useState(false);
+  const [voiceResult, setVoiceResult] = useState(null);
   const [agencies, setAgencies]     = useState([]);
   const [sosId, setSosId]           = useState(null);
   const [hospital, setHospital]     = useState(null);
@@ -193,7 +194,49 @@ export default function SOSPage() {
   const [cachedSOS, setCachedSOS]   = useState(hasCachedSOS());
   const [recoveryResult, setRecoveryResult] = useState(null);
   const timerRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
   const TOTAL = 10;
+
+  const toggleRecording = async () => {
+    if (recording) {
+      // Stop recording and send to backend
+      mediaRecorderRef.current?.stop();
+      setRecording(false);
+    } else {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mr = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+        audioChunksRef.current = [];
+        mr.ondataavailable = e => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
+        mr.onstop = async () => {
+          stream.getTracks().forEach(t => t.stop());
+          const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+          const reader = new FileReader();
+          reader.onloadend = async () => {
+            const b64 = reader.result.split(',')[1];
+            try {
+              const uid = await getUserId();
+              // If SOS is active send to analyze-voice, else just show classification
+              const result = await analyzeVoice({
+                sos_event_id: sosId || '00000000-0000-0000-0000-000000000001',
+                audio_base64: b64,
+              });
+              setVoiceResult(result);
+            } catch (e) { console.warn('[Voice] analysis failed:', e); }
+          };
+          reader.readAsDataURL(blob);
+        };
+        mediaRecorderRef.current = mr;
+        mr.start();
+        setRecording(true);
+        // Auto-stop after 8 seconds
+        setTimeout(() => { if (mr.state === 'recording') mr.stop(); }, 8000);
+      } catch (e) {
+        console.warn('[Voice] mic access denied:', e);
+      }
+    }
+  };
 
   const startSOS = async () => {
     if (phase !== 'idle' || loading) return;
@@ -373,12 +416,20 @@ export default function SOSPage() {
         {/* Voice SOS */}
         <div style={{ padding:'0 16px 14px' }}>
           <div style={{ display:'flex', alignItems:'center', gap:12, padding:'12px 14px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:14 }}>
-            <button onClick={() => setRecording(r => !r)} style={{ width:46, height:46, borderRadius:'50%', border:'none', background:recording ? '#DC2626' : '#1F1F1F', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', flexShrink:0, animation:recording ? 'blink 1s ease-in-out infinite' : 'none', boxShadow:recording ? '0 0 14px rgba(220,38,38,0.5)' : 'none' }}>
+            <button onClick={toggleRecording} style={{ width:46, height:46, borderRadius:'50%', border:'none', background:recording ? '#DC2626' : '#1F1F1F', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', flexShrink:0, animation:recording ? 'blink 1s ease-in-out infinite' : 'none', boxShadow:recording ? '0 0 14px rgba(220,38,38,0.5)' : 'none' }}>
               {recording ? <Mic size={20} color="#fff" /> : <MicOff size={20} color="#6B7280" />}
             </button>
-            <div>
+            <div style={{ flex:1 }}>
               <div style={{ fontSize:13, fontWeight:700, color:'#F5F5F5' }}>Voice SOS</div>
-              <div style={{ fontSize:11, color:'#6B7280' }}>{recording ? 'Recording… speak your emergency' : 'Tap mic to describe your emergency'}</div>
+              <div style={{ fontSize:11, color:'#6B7280' }}>{recording ? 'Recording… tap again to stop & analyse' : 'Tap mic — AI classifies emergency type'}</div>
+              {voiceResult && (
+                <div style={{ marginTop:4, padding:'4px 8px', borderRadius:8, background:'rgba(239,68,68,0.15)', border:'1px solid rgba(239,68,68,0.3)', display:'inline-block' }}>
+                  <span style={{ fontSize:10, fontWeight:700, color:'#EF4444' }}>
+                    Voice: {voiceResult.priority} · {Math.round((voiceResult.confidence||0)*100)}% confidence
+                    {voiceResult.indicators?.length > 0 ? ` · ${voiceResult.indicators[0]}` : ''}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bell, MapPin, Zap, Users, Shield, AlertTriangle, Wifi, Navigation, Radio, Hospital, Phone, Activity, CheckCircle, X } from 'lucide-react';
-import { getHazardNodes, getNearbyResponders, getHospitalRoute } from '../api/api.js';
+import { getHazardNodes, getNearbyResponders, getHospitalRoute, setLanguage } from '../api/api.js';
 import { getLocation } from '../lib/location.js';
 import { getUserId } from '../lib/user.js';
 
@@ -123,6 +123,25 @@ export default function HomePage() {
   const [activeAlert, setActiveAlert] = useState(null);
   const [syncCount, setSyncCount] = useState(0);
   const [lifelineSet, setLifelineSet] = useState(false);
+  const [lang, setLang] = useState(() => localStorage.getItem('roadsos_lang') || 'en');
+  const [showLangPicker, setShowLangPicker] = useState(false);
+
+  const LANGS = [
+    { code:'en', label:'English' }, { code:'hi', label:'हिंदी' },
+    { code:'te', label:'తెలుగు' }, { code:'ta', label:'தமிழ்' },
+    { code:'kn', label:'ಕನ್ನಡ' },  { code:'ml', label:'മലയാളം' },
+    { code:'fr', label:'Français' },{ code:'es', label:'Español' },
+    { code:'ar', label:'العربية' }, { code:'de', label:'Deutsch' },
+    { code:'zh', label:'中文' },    { code:'pt', label:'Português' },
+    { code:'ru', label:'Русский' },
+  ];
+
+  const changeLang = async (code) => {
+    setLang(code);
+    localStorage.setItem('roadsos_lang', code);
+    setShowLangPicker(false);
+    try { const uid = await getUserId(); await setLanguage({ user_id: uid, language: code }); } catch(e) {}
+  };
   const [stats, setStats] = useState({ nearestKm:'—', responders:'—', hazards:'—', activeSOS:'0' });
   const [hazards, setHazards] = useState([]);
   const [alerts, setAlerts] = useState([]);
@@ -220,7 +239,20 @@ export default function HomePage() {
         {/* Header */}
         <div style={{ padding:'14px 18px 0', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
           <div style={{ color:'#fff', fontWeight:300, fontSize:22, letterSpacing:'0.22em', textTransform:'lowercase', fontFamily:"'Outfit', 'Inter', sans-serif" }}>varadhi</div>
-          <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:10, position:'relative' }}>
+            {/* Language picker */}
+            <button onClick={() => setShowLangPicker(p => !p)} style={{ background:'#1A1A1A', border:'1px solid #2A2A2A', borderRadius:10, padding:'5px 8px', cursor:'pointer', fontSize:11, color:'#9CA3AF', fontWeight:600 }}>
+              🌐 {lang.toUpperCase()}
+            </button>
+            {showLangPicker && (
+              <div style={{ position:'absolute', top:38, right:0, background:'#1A1A1A', border:'1px solid #2E2E2E', borderRadius:12, padding:8, zIndex:999, minWidth:160, boxShadow:'0 8px 24px rgba(0,0,0,0.5)' }}>
+                {LANGS.map(l => (
+                  <button key={l.code} onClick={() => changeLang(l.code)} style={{ display:'block', width:'100%', padding:'7px 10px', background:lang===l.code ? 'rgba(220,38,38,0.15)' : 'none', border:'none', borderRadius:8, color:lang===l.code ? '#EF4444' : '#D1D5DB', fontSize:12, textAlign:'left', cursor:'pointer', fontWeight:lang===l.code ? 700 : 400 }}>
+                    {l.label}
+                  </button>
+                ))}
+              </div>
+            )}
             <button style={{ position:'relative', background:'#1A1A1A', border:'1px solid #2A2A2A', borderRadius:10, padding:8, cursor:'pointer' }} aria-label="Notifications">
               <Bell size={16} color="#ccc" />
               {alerts.length > 0 && <span style={{ position:'absolute', top:6, right:6, width:7, height:7, borderRadius:'50%', background:'#FF2D2D', border:'1.5px solid #000' }} />}

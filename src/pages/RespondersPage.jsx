@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Users, UserPlus, AlertTriangle, Check, X, ChevronDown, Clock, MapPin, Upload, Shield, BadgeCheck, Loader } from 'lucide-react';
-import { getNearbyResponders } from '../api/api.js';
+import { getNearbyResponders, dispatchResponders, confirmBystander } from '../api/api.js';
 import { getLocation } from '../lib/location.js';
 import { getUserId } from '../lib/user.js';
 
@@ -113,7 +113,13 @@ function NearbyTab() {
             </div>
           </div>
           <div style={{ display:'flex', gap:8 }}>
-            <button onClick={() => setAccepted(true)} style={{ flex:1, padding:'9px', borderRadius:10, border:'none', background:'linear-gradient(135deg,#16A34A,#15803D)', color:'#fff', fontSize:12, fontWeight:700, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:5, boxShadow:'0 0 12px rgba(22,163,74,0.4)' }}>
+            <button onClick={async () => {
+              setAccepted(true);
+              try {
+                const uid = await getUserId();
+                await confirmBystander({ sos_event_id: '00000000-0000-0000-0000-000000000001', user_id: uid, status: 'ACCEPTED', capability_level: 'LAYPERSON', eta_seconds: 120 });
+              } catch(e) { console.warn('[Bystander] confirm failed:', e); }
+            }} style={{ flex:1, padding:'9px', borderRadius:10, border:'none', background:'linear-gradient(135deg,#16A34A,#15803D)', color:'#fff', fontSize:12, fontWeight:700, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:5, boxShadow:'0 0 12px rgba(22,163,74,0.4)' }}>
               <Check size={13} /> I can help
             </button>
             <button onClick={() => setAccepted(false)} style={{ flex:1, padding:'9px', borderRadius:10, background:'rgba(55,65,81,0.5)', border:'1px solid #374151', color:'#9CA3AF', fontSize:12, fontWeight:700, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:5 }}>
@@ -150,7 +156,13 @@ function NearbyTab() {
         </div>
       ) : (
         responders.map(r => (
-          <ResponderCard key={r.id} r={r} dispatched={dispatched.includes(r.id)} onDispatch={id => setDispatched(d => [...d, id])} />
+          <ResponderCard key={r.id} r={r} dispatched={dispatched.includes(r.id)} onDispatch={async (id) => {
+            setDispatched(d => [...d, id]);
+            try {
+              const loc = await getLocation();
+              await dispatchResponders({ sos_event_id: `00000000-0000-0000-0000-${Date.now().toString().slice(-12).padStart(12,'0')}`, lat: loc.lat, lng: loc.lng });
+            } catch(e) { console.warn('[Dispatch] failed:', e); }
+          }} />
         ))
       )}
 
