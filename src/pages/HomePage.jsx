@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bell, MapPin, Zap, Users, Shield, AlertTriangle, Wifi, Navigation, Radio, Hospital, Phone, Activity, CheckCircle, X } from 'lucide-react';
 import { getHazardNodes, getNearbyResponders, getHospitalRoute, setLanguage } from '../api/api.js';
+import { useLang } from '../lib/LangContext.jsx';
+import { t } from '../lib/i18n.js';
 import { getLocation } from '../lib/location.js';
 import { getUserId } from '../lib/user.js';
 
@@ -123,7 +125,7 @@ export default function HomePage() {
   const [activeAlert, setActiveAlert] = useState(null);
   const [syncCount, setSyncCount] = useState(0);
   const [lifelineSet, setLifelineSet] = useState(false);
-  const [lang, setLang] = useState(() => localStorage.getItem('roadsos_lang') || 'en');
+  const { lang, changeLang: ctxChangeLang } = useLang();
   const [showLangPicker, setShowLangPicker] = useState(false);
 
   const LANGS = [
@@ -137,8 +139,7 @@ export default function HomePage() {
   ];
 
   const changeLang = async (code) => {
-    setLang(code);
-    localStorage.setItem('roadsos_lang', code);
+    ctxChangeLang(code);  // updates context → all components re-render
     setShowLangPicker(false);
     try { const uid = await getUserId(); await setLanguage({ user_id: uid, language: code }); } catch(e) {}
   };
@@ -271,9 +272,9 @@ export default function HomePage() {
 
         {/* Stats */}
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, padding:'0 16px 16px' }}>
-          <StatCard icon={MapPin}  value={stats.nearestKm} label="Nearest hospital"    sub={stats.nearestKm === '—' ? 'Loading…' : 'Live capacity'}    delay={50}  />
+          <StatCard icon={MapPin}  value={stats.nearestKm} label={t('home.nearest_hospital')}  sub={stats.nearestKm === '—' ? 'Loading…' : t('home.live_capacity')}    delay={50}  />
           <StatCard icon={Zap}     value="99%"             label="System uptime"        sub="All services live"                                           delay={120} />
-          <StatCard icon={Users}   value={stats.responders}label="Responders nearby"   sub={stats.responders === '—' ? 'Loading…' : 'Verified & active'} delay={190} />
+          <StatCard icon={Users}   value={stats.responders} label={t('home.responders')} sub={stats.responders === '—' ? 'Loading…' : t('home.verified')} delay={190} />
           <StatCard icon={Shield}  value={stats.activeSOS} label="Active SOS near you" sub="All clear"                                                    delay={260} />
         </div>
 

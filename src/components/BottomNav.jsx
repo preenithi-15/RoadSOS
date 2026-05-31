@@ -1,17 +1,20 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { Home, AlertOctagon, Map, Flag, Navigation } from 'lucide-react';
+import { useLang } from '../lib/LangContext.jsx';
+import { t } from '../lib/i18n.js';
 
-const NAV_ITEMS = [
-  { to: '/',           label: 'Home',      Icon: Home },
-  { to: '/map',        label: 'Map',       Icon: Map },
-  { to: '/sos',        label: 'SOS',       Icon: AlertOctagon, isSOS: true },
-  { to: '/trip',       label: 'Trip',      Icon: Navigation },
-  { to: '/community',  label: 'Community', Icon: Flag },
+const NAV_DEFS = [
+  { to: '/',           key: 'nav.home',      Icon: Home },
+  { to: '/map',        key: 'nav.map',       Icon: Map },
+  { to: '/sos',        key: 'nav.sos',       Icon: AlertOctagon, isSOS: true },
+  { to: '/trip',       key: 'nav.trip',      Icon: Navigation },
+  { to: '/community',  key: 'nav.community', Icon: Flag },
 ];
 
 export default function BottomNav() {
   const location = useLocation();
+  const { lang } = useLang();
 
   return (
     <nav
@@ -22,7 +25,8 @@ export default function BottomNav() {
         height: '64px',
       }}
     >
-      {NAV_ITEMS.map(({ to, label, Icon, isSOS }) => {
+      {NAV_DEFS.map(({ to, key, Icon, isSOS }) => {
+        const label = t(key);
         const active = location.pathname === to;
 
         if (isSOS) {

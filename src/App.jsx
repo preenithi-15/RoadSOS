@@ -13,6 +13,7 @@ import CommunityPage from './pages/CommunityPage';
 import TripPage from './pages/TripPage';
 import { getUserId } from './lib/user.js';
 import { watchForRecovery } from './lib/offline.js';
+import { LangProvider } from './lib/LangContext.jsx';
 
 export default function App() {
   const [splashDone, setSplashDone] = useState(false);
@@ -28,6 +29,7 @@ export default function App() {
   }, []);
 
   return (
+    <LangProvider>
     <BrowserRouter>
       {/*
         Mobile shell: fixed max-width centered on desktop,
@@ -78,5 +80,6 @@ export default function App() {
         }}
       />
     </BrowserRouter>
+    </LangProvider>
   );
 }
