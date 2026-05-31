@@ -258,7 +258,7 @@ export default function HomePage() {
               <Bell size={16} color="#ccc" />
               {alerts.length > 0 && <span style={{ position:'absolute', top:6, right:6, width:7, height:7, borderRadius:'50%', background:'#FF2D2D', border:'1.5px solid #000' }} />}
             </button>
-            <div style={{ width:34, height:34, borderRadius:'50%', background:'linear-gradient(135deg,#FF2D2D,#8B0000)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:700, color:'#fff', letterSpacing:'0.05em' }}>RS</div>
+            <button onClick={() => navigate('/medical')} style={{ width:34, height:34, borderRadius:'50%', background:'linear-gradient(135deg,#FF2D2D,#8B0000)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:700, color:'#fff', letterSpacing:'0.05em', border:'none', cursor:'pointer', flexShrink:0 }}>RS</button>
           </div>
         </div>
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -59,6 +59,7 @@ export default function MapPage() {
   const [layer, setLayer] = useState('hazards');
   const [sheetOpen, setSheetOpen] = useState(false);
   const [userPos, setUserPos] = useState([DEFAULT_LOCATION.lat, DEFAULT_LOCATION.lng]);
+  const locRef = useRef({ lat: DEFAULT_LOCATION.lat, lng: DEFAULT_LOCATION.lng });
   const [hazards, setHazards] = useState([]);
   const [hospitals, setHospitals] = useState([]);
   const [loadingHazards, setLoadingHazards] = useState(false);
@@ -84,6 +85,7 @@ export default function MapPage() {
   // Get user location and load hazard nodes on mount
   useEffect(() => {
     getLocation().then(loc => {
+      locRef.current = loc;
       setUserPos([loc.lat, loc.lng]);
       fetchHazards(loc.lat, loc.lng);
     });
@@ -104,8 +106,9 @@ export default function MapPage() {
   const fetchHospitals = async () => {
     setLoadingHospitals(true);
     try {
+      const { lat, lng } = locRef.current;
       const profile = JSON.parse(localStorage.getItem('roadsos_profile') || '{}');
-      const data = await getHospitalRoute({ lat: userPos[0], lng: userPos[1], blood_group: profile.blood_group || 'O+' });
+      const data = await getHospitalRoute({ lat, lng, blood_group: profile.blood_group || 'O+' });
       const list = [];
       if (data.hospital) list.push({ ...data.hospital, idx: 0, stale: data.stale_warning });
       if (data.alternatives) {
@@ -122,7 +125,8 @@ export default function MapPage() {
   const fetchEmergency = async () => {
     setLoadingEmergency(true);
     try {
-      const data = await getEmergencyContacts({ lat: userPos[0], lng: userPos[1], radius_km: 20 });
+      const { lat, lng } = locRef.current;
+      const data = await getEmergencyContacts({ lat, lng, radius_km: 20 });
       setEmergency(data.contacts?.filter(c => c.lat && c.lng && !c.is_national_helpline) || []);
     } catch (e) { console.warn('[Map] emergency contacts failed:', e); }
     finally { setLoadingEmergency(false); }

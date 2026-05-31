@@ -81,6 +81,7 @@ export default function TripPage() {
   const [alert, setAlert]         = useState(null);
   const [addingStop, setAddingStop] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [planError, setPlanError] = useState(null);
   const stopMonitor = useRef(null);
 
   useEffect(() => {
@@ -97,7 +98,7 @@ export default function TripPage() {
 
   const handlePlan = async () => {
     if (!origin.trim() || !dest.trim()) return;
-    setLoading(true); setTrip(null); setCps([]); setRouteLine([]); setAlert(null);
+    setLoading(true); setTrip(null); setCps([]); setRouteLine([]); setAlert(null); setPlanError(null);
     try {
       const user_id = await getUserId();
       const result = await planTrip({
@@ -111,17 +112,20 @@ export default function TripPage() {
         if (result.route_geometry?.length) {
           setRouteLine(result.route_geometry.map(([lng, lat]) => [lat, lng]));
         }
-        // Cache trip for offline proximity monitoring
         cacheTrip(result, result.checkpoints || []);
-        // Start proximity monitoring
         stopMonitor.current?.();
         stopMonitor.current = startProximityMonitor(({ checkpoint, distance_km }) => {
           setAlert({ checkpoint, distance_km });
           setTimeout(() => setAlert(null), 12000);
         });
+      } else if (result?.error) {
+        setPlanError(result.error);
+      } else {
+        setPlanError('Could not plan the route. Check the location names and try again.');
       }
     } catch (e) {
       console.error('[Trip] plan failed:', e);
+      setPlanError('Could not connect to the route planner. Please try again.');
     }
     setLoading(false);
   };
@@ -344,7 +348,14 @@ export default function TripPage() {
           </>
         )}
 
-        {!trip && !loading && (
+        {planError && (
+          <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 12, padding: '12px 14px', marginBottom: 12, display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+            <AlertTriangle size={14} color="#EF4444" style={{ marginTop: 1, flexShrink: 0 }} />
+            <div style={{ fontSize: 12, color: '#FCA5A5', lineHeight: 1.5 }}>{planError}</div>
+          </div>
+        )}
+
+        {!trip && !loading && !planError && (
           <div style={{ textAlign: 'center', padding: '40px 20px', color: '#4B5563' }}>
             <Route size={36} style={{ margin: '0 auto 12px', opacity: 0.4 }} />
             <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>Plan a safe route</div>
