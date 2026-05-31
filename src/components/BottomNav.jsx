@@ -1,13 +1,13 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, AlertOctagon, Heart, Map, Users } from 'lucide-react';
+import { Home, AlertOctagon, Map, Flag, Navigation } from 'lucide-react';
 
 const NAV_ITEMS = [
-  { to: '/',           label: 'Home',       Icon: Home },
-  { to: '/sos',        label: 'SOS',        Icon: AlertOctagon, isSOS: true },
-  { to: '/medical',    label: 'Medical',    Icon: Heart },
-  { to: '/map',        label: 'Map',        Icon: Map },
-  { to: '/responders', label: 'Responders', Icon: Users },
+  { to: '/',           label: 'Home',      Icon: Home },
+  { to: '/map',        label: 'Map',       Icon: Map },
+  { to: '/sos',        label: 'SOS',       Icon: AlertOctagon, isSOS: true },
+  { to: '/trip',       label: 'Trip',      Icon: Navigation },
+  { to: '/community',  label: 'Community', Icon: Flag },
 ];
 
 export default function BottomNav() {
